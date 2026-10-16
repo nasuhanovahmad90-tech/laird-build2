@@ -1,0 +1,31 @@
+name: Build Android NDK Library
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Unpack jni.zip
+        run: |
+          unzip jni.zip -d ./
+          ls -la jni/
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25c
+
+      - name: Compile with ndk-build
+        run: |
+          cd jni
+          ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=./Android.mk NDK_APPLICATION_MK=./Application.mk
+
+      - name: Upload Finished Library
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-liblaird
+          path: jni/libs/arm64-v8a/liblaird.so
+          
